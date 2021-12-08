@@ -1,0 +1,18 @@
+rimport { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import React from "react";
+import HomeScreen from "./screens/HomeScreen";
+import DetailScreen from "./screens/DetailScreenjsx";
+
+const NavStack = createStackNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <NavStack.Navigator>
+        <NavStack.Screen name="HomeScreen" component={HomeScreen} />
+        <NavStack.Screen name="DetailScreen" component={DetailScreen} />
+      </NavStack.Navigator>
+    </NavigationContainer>
+  );
+}
