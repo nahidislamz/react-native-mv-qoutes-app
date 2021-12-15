@@ -4,10 +4,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import HomeScreen from "./screens/HomeScreen";
 import DetailScreen from "./screens/DetailScreen";
-import FavoriteScreen from "./screens/FavoriteScreen";
 import AboutScreen from "./screens/AboutScreen";
+import QuoteListScreen from "./screens/QuoteListScreen";
+import CharacterListScreen from "./screens/CharacterListScreen";
 import React from "react";
 import { LogBox } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 
@@ -21,54 +23,73 @@ const StackHomeScreen = () => {
         name="HomeScreen"
         component={HomeScreen}
         options={{
-          title: "Quotes",
+          title: "Random Quotes",
           headerStyle: {
-            backgroundColor: "tomato",
+            height: 80, // Specify the height of your custom header
           },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-          headerRight: () => (
-            <Ionicons
-              onPress={() => alert("This is a button!")}
-              name="add"
-              color="#fff"
-              size={30}
-            />
-          ),
         }}
       />
       <NavStack.Screen
         name="DetailScreen"
         component={DetailScreen}
-        options={({ route }) => ({ title: "Quotes By " + route.params.author })}
+        options={({ route }) => ({
+          title: "Quotes By " + route.params.name,
+        })}
       />
     </NavStack.Navigator>
   );
 };
-
+const StackCharacterScreen = () => {
+  return (
+    <NavStack.Navigator>
+      <NavStack.Screen
+        name="CharacterListScreen"
+        component={CharacterListScreen}
+        options={() => ({
+          title: "Browse By Characters ",
+          headerStyle: {
+            backgroundColor: "#ffbf17",
+          },
+        })}
+      />
+      <NavStack.Screen
+        name="QuoteListScreen"
+        component={QuoteListScreen}
+        options={({ route }) => ({
+          title: "Quotes By " + route.params.name,
+          headerStyle: {
+            backgroundColor: "#ffbf17",
+          },
+          headerShown: false,
+        })}
+      />
+      <NavStack.Screen
+        name="DetailScreen"
+        component={DetailScreen}
+        options={({ route }) => ({
+          title: "Quotes By " + route.params.name,
+        })}
+      />
+    </NavStack.Navigator>
+  );
+};
 export default function App() {
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={DarkTheme}>
+      <StatusBar />
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarStyle: {
-            height: 60,
-            position: "absolute",
-            bottom: 16,
-            right: 16,
-            left: 16,
-            borderRadius: 16,
-          },
+
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
 
             if (route.name === "Home") {
-              iconName = focused ? "home-sharp" : "home-outline";
-            } else if (route.name === "Favorite") {
-              iconName = focused ? "heart-sharp" : "heart-outline";
+              iconName = focused ? "shuffle-sharp" : "shuffle-outline";
+            } else if (route.name === "Characters") {
+              iconName = focused
+                ? "people-circle-sharp"
+                : "people-circle-outline";
             } else if (route.name === "About") {
               iconName = focused
                 ? "ios-information-circle-sharp"
@@ -77,12 +98,13 @@ export default function App() {
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: "tomato",
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: "#ffbf17",
           tabBarInactiveTintColor: "gray",
         })}
       >
         <Tab.Screen name="Home" component={StackHomeScreen} />
-        <Tab.Screen name="Favorite" component={FavoriteScreen} />
+        <Tab.Screen name="Characters" component={StackCharacterScreen} />
         <Tab.Screen name="About" component={AboutScreen} />
       </Tab.Navigator>
     </NavigationContainer>

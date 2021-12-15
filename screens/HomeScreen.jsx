@@ -1,58 +1,98 @@
-import React, { useState, useEffect } from "react";
-import { NativeBaseProvider, FlatList, Spinner, Center } from "native-base";
-import Card from "../components/Card";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  NativeBaseProvider,
+  FlatList,
+  Box,
+  Text,
+  Pressable,
+  Center,
+} from "native-base";
 import config from "../Common/Config";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-
-import app from "../Firebase";
-
-const db = getFirestore(app);
+import quotes from "../database/quotes.json";
+import { Platform } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function HomeScreen({ navigation }) {
-  const [getQuote, setQuotes] = useState([]);
-  const [isLoading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
 
-  const getQuotesData = async () => {
-    const data = [];
-    const querySnapshot = await getDocs(collection(db, "quotes"));
-    querySnapshot.forEach((doc) => {
-      data.push({
-        id: doc.id,
-        quotes: doc.data().quotes,
-        author: doc.data().author,
-      });
-    });
-    setQuotes(data);
-    setLoading(false);
-  };
+  const renderItem = ({ item }) => (
+    <Pressable
+      onPress={() => {
+        navigation.push("DetailScreen", { quote: item.quote, name: item.name });
+      }}
+    >
+      {({ isHovered, isPressed }) => {
+        return (
+          <Box
+            bg={
+              isPressed
+                ? "yellow.500"
+                : isHovered
+                ? "yellow.200:alpha.70"
+                : "gray.700"
+            }
+            p="5"
+            rounded="8"
+            style={{
+              transform: [
+                {
+                  scale: isPressed ? 0.99 : 1,
+                },
+              ],
+            }}
+            borderRadius="8"
+            p="5"
+            m="2"
+            bg="gray.800"
+            shadow="3"
+          >
+            <Center>
+              <MaterialCommunityIcons
+                name="comment-quote"
+                size={34}
+                color="#ffbf17"
+              />
+            </Center>
+            <Text
+              color="yellow.100"
+              mt="3"
+              fontWeight="bold"
+              fontSize={20}
+              italic
+            >
+              {'"' + item.quote + '"'}
+            </Text>
+            <Text
+              fontSize={14}
+              color="yellow.100"
+              mt="4"
+              mx="4"
+              bold
+              fontWeight="medium"
+              alignItems="flex-end"
+              textAlign="right"
+            >
+              {"~ " + item.name}
+            </Text>
+          </Box>
+        );
+      }}
+    </Pressable>
+  );
+  const memoizedValue = useMemo(() => renderItem, [data]);
 
   useEffect(() => {
-    getQuotesData();
-  });
+    setData(quotes);
+  }, []);
 
   return (
     <NativeBaseProvider config={config}>
-      {isLoading ? (
-        <Center flex={1} alignItems="center">
-          <Spinner color="blue.800" size="lg" />
-        </Center>
-      ) : (
-        <FlatList
-          data={getQuote}
-          renderItem={({ item: { id, quotes, author }, key }) => (
-            <Card
-              id={id}
-              key={key}
-              navigation={navigation}
-              screen="DetailScreen"
-              authors={author}
-              quotes={quotes}
-              color="violet.50"
-            />
-          )}
-          keyExtractor={(item) => item.key}
-        />
-      )}
+      <FlatList
+        numColumns={Platform.OS == "web" ? 1 : 1}
+        data={data}
+        renderItem={memoizedValue}
+        keyExtractor={(item, index) => index}
+      />
     </NativeBaseProvider>
   );
 }
