@@ -15,6 +15,7 @@ import character from "../database/character.json";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
+import ExpoFastImage from "expo-fast-image";
 
 export default function CharacterListScreen({ navigation }) {
   const [search, setSearch] = useState("");
@@ -34,6 +35,7 @@ export default function CharacterListScreen({ navigation }) {
       setSearch(text);
     }
   };
+
   const renderItem = ({ item }) => (
     <Pressable
       onPress={() => {
@@ -69,16 +71,28 @@ export default function CharacterListScreen({ navigation }) {
             m="2"
             shadow="3"
           >
-            <Image
-              mt="5"
-              size="lg"
-              borderRadius="100"
-              resizeMode="cover"
-              source={{
-                uri: item.image,
-              }}
-              alt={item.name}
-            />
+            {Platform.OS == "web" ? (
+              <Image
+                mt="5"
+                size="lg"
+                borderRadius="100"
+                resizeMode="cover"
+                source={{
+                  uri: item.image,
+                }}
+                alt={item.name}
+              />
+            ) : (
+              <ExpoFastImage
+                uri={item.image}
+                cacheKey={item.id}
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: 100,
+                }}
+              />
+            )}
             <Text ml="4" color="yellow.100" fontWeight="bold" fontSize={18}>
               {item.name}
             </Text>
