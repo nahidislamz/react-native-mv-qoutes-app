@@ -11,13 +11,28 @@ import config from "../Common/Config";
 import quotes from "../database/quotes.json";
 import { Platform } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AdMobInterstitial } from "expo-ads-admob";
+import { INTERSTITIAL_ID } from "../Common/Config";
 
 export default function HomeScreen({ navigation }) {
   const [data, setData] = useState([]);
+  Platform.OS == "android"
+    ? AdMobInterstitial.setAdUnitID(INTERSTITIAL_ID)
+    : null;
+
+  const _openInterstitial = async () => {
+    try {
+      await AdMobInterstitial.requestAdAsync();
+      await AdMobInterstitial.showAdAsync();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const renderItem = ({ item }) => (
     <Pressable
       onPress={() => {
+        Platform.OS == "android" ? _openInterstitial() : null;
         navigation.push("DetailScreen", { quote: item.quote, name: item.name });
       }}
     >
@@ -26,7 +41,7 @@ export default function HomeScreen({ navigation }) {
           <Box
             bg={
               isPressed
-                ? "yellow.500"
+                ? "yellow.600"
                 : isHovered
                 ? "yellow.200:alpha.70"
                 : "gray.700"
@@ -57,7 +72,7 @@ export default function HomeScreen({ navigation }) {
               color="yellow.100"
               mt="3"
               fontWeight="bold"
-              fontSize={20}
+              fontSize={16}
               italic
             >
               {'"' + item.quote + '"'}

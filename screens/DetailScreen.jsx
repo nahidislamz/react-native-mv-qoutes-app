@@ -1,30 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   NativeBaseProvider,
   Center,
   Box,
   Image,
-  Pressable,
+  Button,
   Divider,
   Text,
+  ScrollView,
+  useToast,
 } from "native-base";
+import { BANNER_ID, INTERSTITIAL_ID } from "../Common/Config";
+import { AdMobBanner, AdMobInterstitial } from "expo-ads-admob";
+import { Share } from "react-native";
+import Clipboard from "@react-native-community/clipboard";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import character from "../database/character.json";
 
 export default function DetailScreen({ route }) {
   const { name, quote } = route.params;
-  //const [url, setUrl] = useState();
   let uri;
   character.map((m) => {
     if (name == m.name) {
       uri = m.image;
     }
   });
-  console.log(uri.toString());
+  Platform.OS == "android"
+    ? AdMobInterstitial.setAdUnitID(INTERSTITIAL_ID)
+    : null;
 
+  const _openInterstitial = async () => {
+    try {
+      await AdMobInterstitial.requestAdAsync();
+      await AdMobInterstitial.showAdAsync();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const onShare = async () => {
+    _openInterstitial();
+    try {
+      const result = await Share.share({
+        message: '"' + quote + '"' + "\n\n ~" + name,
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  const toast = useToast();
   return (
     <NativeBaseProvider>
-      <Center flex={1}>
+      <ScrollView flex={1}>
         <Box p="5">
           <Center>
             <Image
@@ -68,32 +103,43 @@ export default function DetailScreen({ route }) {
             {"~ " + name}
           </Text>
           <Center p="4" flexDirection="row">
-            <Pressable
+            <Button
+              size="sm"
+              variant="subtle"
               mx="2"
               p="2"
               rounded="8"
-              bg="yellow.50:alpha.70"
+              bg="yellow.300:alpha.70"
               onPress={() => {
-                alert("text copied");
+                _openInterstitial();
+                Clipboard.setString('"' + quote + '"' + "\n\n ~" + name);
+                toast.show({
+                  description: "Text Copied",
+                });
               }}
             >
               <Ionicons name="copy" size={24} />
-            </Pressable>
-            <Pressable
+            </Button>
+            <Button
+              size="sm"
+              variant="subtle"
               mx="2"
               p="2"
               rounded="8"
-              bg="yellow.50:alpha.70"
+              bg="yellow.300:alpha.70"
               onPress={() => {
-                alert("text copied");
+                onShare();
               }}
             >
               <Ionicons name="share-outline" size={24} />
-            </Pressable>
+            </Button>
           </Center>
           <Divider />
         </Box>
-      </Center>
+        <Center>
+          <AdMobBanner bannerSize="mediumRectangle" adUnitID={BANNER_ID} />
+        </Center>
+      </ScrollView>
     </NativeBaseProvider>
   );
 }

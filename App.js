@@ -10,7 +10,6 @@ import CharacterListScreen from "./screens/CharacterListScreen";
 import React from "react";
 import { LogBox } from "react-native";
 import { StatusBar } from "expo-status-bar";
-
 LogBox.ignoreLogs(["Setting a timer"]);
 
 const NavStack = createStackNavigator();
@@ -24,8 +23,11 @@ const StackHomeScreen = () => {
         component={HomeScreen}
         options={{
           title: "Random Quotes",
-          headerStyle: {
-            height: 80, // Specify the height of your custom header
+          headerTintColor: "#fef08a",
+          headerTitleAlign: "center",
+
+          headerRight: () => {
+            <Ionicons name="shuffle" size={24} color="#fef08a" />;
           },
         }}
       />
@@ -47,20 +49,15 @@ const StackCharacterScreen = () => {
         component={CharacterListScreen}
         options={() => ({
           title: "Browse By Characters ",
-          headerStyle: {
-            backgroundColor: "#ffbf17",
-          },
+          headerTintColor: "#fef08a",
         })}
       />
       <NavStack.Screen
         name="QuoteListScreen"
         component={QuoteListScreen}
-        options={({ route }) => ({
-          title: "Quotes By " + route.params.name,
-          headerStyle: {
-            backgroundColor: "#ffbf17",
-          },
-          headerShown: false,
+        options={({ navigation }) => ({
+          title: "",
+          headerTransparent: true,
         })}
       />
       <NavStack.Screen

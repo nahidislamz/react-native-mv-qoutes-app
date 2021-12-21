@@ -16,11 +16,25 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
 import ExpoFastImage from "expo-fast-image";
+import { AdMobInterstitial } from "expo-ads-admob";
+import { INTERSTITIAL_ID } from "../Common/Config";
 
 export default function CharacterListScreen({ navigation }) {
   const [search, setSearch] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [data, setData] = useState();
+  Platform.OS == "android"
+    ? AdMobInterstitial.setAdUnitID(INTERSTITIAL_ID)
+    : null;
+
+  const _openInterstitial = async () => {
+    try {
+      await AdMobInterstitial.requestAdAsync();
+      await AdMobInterstitial.showAdAsync();
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const searchFilter = (text) => {
     if (text) {
       const newData = character.filter(function (item) {
@@ -39,6 +53,7 @@ export default function CharacterListScreen({ navigation }) {
   const renderItem = ({ item }) => (
     <Pressable
       onPress={() => {
+        _openInterstitial();
         navigation.navigate("QuoteListScreen", {
           name: item.name,
           uri: item.image,
@@ -53,7 +68,7 @@ export default function CharacterListScreen({ navigation }) {
                 ? "yellow.500"
                 : isHovered
                 ? "yellow.200:alpha.70"
-                : "gray.700"
+                : "gray.900"
             }
             p="5"
             rounded="8"
